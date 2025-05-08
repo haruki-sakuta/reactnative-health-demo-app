@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, Alert } from "react-native";
 import { HealthDataCard } from "../components/HealthDataCard";
-import { InputForm } from "../components/InputForm";
+import { HealthDataInputModal } from "../components/HealthDataInputModal";
 import { platformService } from "../services/PlatformService";
 
 export const HomeScreen: React.FC = () => {
   const [height, setHeight] = useState<number | null>(null);
   const [steps, setSteps] = useState<number | null>(null);
-  const [inputHeight, setInputHeight] = useState("");
+  const [isHeightModalVisible, setIsHeightModalVisible] = useState(false);
 
   useEffect(() => {
     initHealthData();
@@ -42,17 +42,10 @@ export const HomeScreen: React.FC = () => {
     setSteps(stepsData);
   };
 
-  const handleSaveHeight = async () => {
-    const heightValue = parseFloat(inputHeight);
-    if (isNaN(heightValue) || heightValue <= 0) {
-      Alert.alert("エラー", "有効な身長を入力してください。");
-      return;
-    }
-
+  const handleSaveHeight = async (heightValue: number) => {
     try {
       const healthService = platformService.getHealthService();
       await healthService.saveHeight(heightValue);
-      setInputHeight("");
       await fetchHealthData();
       Alert.alert("成功", "身長データを保存しました。");
     } catch (error) {
@@ -67,23 +60,19 @@ export const HomeScreen: React.FC = () => {
           title="身長"
           value={height}
           unit="cm"
-          onRefresh={fetchHealthData}
+          onPress={() => setIsHeightModalVisible(true)}
         />
 
-        <InputForm
-          label="身長を入力"
-          value={inputHeight}
-          onChange={setInputHeight}
-          onSubmit={handleSaveHeight}
-          placeholder="身長を入力（cm）"
+        <HealthDataInputModal
+          visible={isHeightModalVisible}
+          onClose={() => setIsHeightModalVisible(false)}
+          onSave={handleSaveHeight}
+          title="身長を入力"
+          placeholder="身長を入力"
+          unit="cm"
         />
 
-        <HealthDataCard
-          title="今日の歩数"
-          value={steps}
-          unit="歩"
-          onRefresh={fetchHealthData}
-        />
+        <HealthDataCard title="今日の歩数" value={steps} unit="歩" />
       </View>
     </ScrollView>
   );

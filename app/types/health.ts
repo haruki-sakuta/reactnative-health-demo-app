@@ -15,7 +15,7 @@ export interface HealthDataCardProps {
   title: string;
   value: number | null;
   unit: string;
-  onRefresh: () => void;
+  onPress?: () => void;
 }
 
 export interface InputFormProps {

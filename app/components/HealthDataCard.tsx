@@ -6,20 +6,17 @@ export const HealthDataCard: React.FC<HealthDataCardProps> = ({
   title,
   value,
   unit,
-  onRefresh,
+  onPress,
 }) => {
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
-        <TouchableOpacity onPress={onRefresh} style={styles.refreshButton}>
-          <Text style={styles.refreshText}>更新</Text>
-        </TouchableOpacity>
+        <Text style={styles.value}>
+          {value !== null ? `${value}${unit}` : "データなし"}
+        </Text>
       </View>
-      <Text style={styles.value}>
-        {value !== null ? `${value}${unit}` : "データなし"}
-      </Text>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -27,7 +24,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     marginVertical: 8,
     shadowColor: "#000",
     shadowOffset: {
@@ -38,27 +35,19 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  header: {
+  content: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
   },
   title: {
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
   },
-  refreshButton: {
-    padding: 4,
-  },
-  refreshText: {
-    color: "#007AFF",
-    fontSize: 14,
-  },
   value: {
-    fontSize: 24,
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "600",
     color: "#000",
   },
 });
