@@ -6,6 +6,8 @@ import { HealthConnectService } from "@/app/services/health/HealthConnectService
 export class PlatformService {
   private static instance: PlatformService;
   private healthService: IHealthService;
+  private isInitialized: boolean = false;
+  private initializationPromise: Promise<void> | null = null;
 
   private constructor() {
     this.healthService = Platform.select({
@@ -22,7 +24,32 @@ export class PlatformService {
     return PlatformService.instance;
   }
 
-  public getHealthService(): IHealthService {
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) return;
+
+    if (!this.initializationPromise) {
+      this.initializationPromise = this.healthService
+        .initialize()
+        .then(() => {
+          this.isInitialized = true;
+        })
+        .catch((error) => {
+          this.initializationPromise = null;
+          throw error;
+        });
+    }
+
+    return this.initializationPromise;
+  }
+
+  public isHealthServiceInitialized(): boolean {
+    return this.isInitialized;
+  }
+
+  public async getHealthService(): Promise<IHealthService> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
     return this.healthService;
   }
 }

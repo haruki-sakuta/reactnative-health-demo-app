@@ -6,16 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
-
-interface HealthDataInputModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSave: (value: number) => Promise<void>;
-  title: string;
-  placeholder: string;
-  unit: string;
-}
+import { HealthDataInputModalProps } from "../types/health";
 
 export const HealthDataInputModal: React.FC<HealthDataInputModalProps> = ({
   visible,
@@ -24,6 +17,7 @@ export const HealthDataInputModal: React.FC<HealthDataInputModalProps> = ({
   title,
   placeholder,
   unit,
+  isLoading = false,
 }) => {
   const [inputValue, setInputValue] = useState("");
 
@@ -34,7 +28,6 @@ export const HealthDataInputModal: React.FC<HealthDataInputModalProps> = ({
     }
     await onSave(value);
     setInputValue("");
-    onClose();
   };
 
   return (
@@ -54,15 +47,28 @@ export const HealthDataInputModal: React.FC<HealthDataInputModalProps> = ({
               onChangeText={setInputValue}
               placeholder={placeholder}
               keyboardType="numeric"
+              editable={!isLoading}
             />
             <Text style={styles.unit}>{unit}</Text>
           </View>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity
+              style={[styles.cancelButton, isLoading && styles.disabledButton]}
+              onPress={onClose}
+              disabled={isLoading}
+            >
               <Text style={styles.cancelButtonText}>キャンセル</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveButtonText}>保存</Text>
+            <TouchableOpacity
+              style={[styles.saveButton, isLoading && styles.disabledButton]}
+              onPress={handleSave}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.saveButtonText}>保存</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -132,6 +138,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#007AFF",
     justifyContent: "center",
     alignItems: "center",
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
   cancelButtonText: {
     color: "#666",
