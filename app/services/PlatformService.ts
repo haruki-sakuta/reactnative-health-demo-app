@@ -1,16 +1,14 @@
 import { Platform } from "react-native";
-import { IHealthService } from "../types/health";
+import { IHealthKitService, IHealthConnectService } from "../types/health";
 import { HealthKitService } from "@/app/services/health/HealthKitService";
 import { HealthConnectService } from "@/app/services/health/HealthConnectService";
 
 export class PlatformService {
   private static instance: PlatformService;
-  private healthService: IHealthService;
-  private isInitialized: boolean = false;
-  private initializationPromise: Promise<void> | null = null;
+  private healthService: IHealthKitService | IHealthConnectService;
 
   private constructor() {
-    this.healthService = Platform.select({
+    this.healthService = Platform.select<IHealthKitService | IHealthConnectService>({
       ios: new HealthKitService(),
       android: new HealthConnectService(),
       default: new HealthKitService(),
@@ -24,33 +22,12 @@ export class PlatformService {
     return PlatformService.instance;
   }
 
-  public async initialize(): Promise<void> {
-    if (this.isInitialized) return;
-
-    if (!this.initializationPromise) {
-      this.initializationPromise = this.healthService
-        .initialize()
-        .then(() => {
-          this.isInitialized = true;
-        })
-        .catch((error) => {
-          this.initializationPromise = null;
-          throw error;
-        });
-    }
-
-    return this.initializationPromise;
+  public getHealthKitService(): IHealthKitService {
+    return this.healthService as IHealthKitService;
   }
 
-  public isHealthServiceInitialized(): boolean {
-    return this.isInitialized;
-  }
-
-  public async getHealthService(): Promise<IHealthService> {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
-    return this.healthService;
+  public getHealthConnectService(): IHealthConnectService {
+    return this.healthService as IHealthConnectService;
   }
 }
 

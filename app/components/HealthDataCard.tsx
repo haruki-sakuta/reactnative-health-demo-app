@@ -1,59 +1,27 @@
-import React, { useState } from "react";
+/**
+ * TODO
+ * configのwriteの状況によって、タップ時無効にする（見分けるタブも表示したい）
+ */
+
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import { HealthDataCardProps } from "../types/health";
 import { HealthDataInputModal } from "./HealthDataInputModal";
-import { platformService } from "../services/PlatformService";
 
-export const HealthDataCard: React.FC<HealthDataCardProps> = ({
-  title,
-  value,
-  unit,
-  onPress,
-  type,
-}) => {
+interface HealthDataCardProps {
+  id: string;
+  title: string;
+  value: string;
+  unit: string;
+  placeholder: string;
+  onDataUpdate: () => void;
+}
+
+export const HealthDataCard: React.FC<HealthDataCardProps> = ({ id, title, value, unit, placeholder, onDataUpdate }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handlePress = () => {
-    if (onPress) {
-      onPress();
-    } else {
-      setIsModalVisible(true);
-    }
-  };
-
-  const handleSave = async (newValue: number) => {
-    if (!type) return;
-
-    try {
-      setIsSaving(true);
-      const healthService = await platformService.getHealthService();
-
-      switch (type) {
-        case "height":
-          await healthService.saveHeight(newValue);
-          break;
-        // 他のデータタイプの保存処理を追加
-        default:
-          throw new Error("未対応のデータタイプです");
-      }
-
-      setIsModalVisible(false);
-      // 保存成功後にデータを再取得するためのコールバック
-      if (onPress) {
-        onPress();
-      }
-    } catch (error) {
-      Alert.alert("エラー", "データの保存に失敗しました");
-      console.error("Save data error:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <>
-      <TouchableOpacity style={styles.card} onPress={handlePress}>
+      <TouchableOpacity style={styles.card} onPress={() => setIsModalVisible(true)}>
         <View style={styles.content}>
           <View style={styles.titleContainer}>
             <Text style={styles.title} numberOfLines={2}>
@@ -61,21 +29,19 @@ export const HealthDataCard: React.FC<HealthDataCardProps> = ({
             </Text>
           </View>
           <View style={styles.valueContainer}>
-            <Text style={styles.value}>
-              {value !== null ? `${value}${unit}` : "データなし"}
-            </Text>
+            <Text style={styles.value}>{value !== "" ? `${value}${unit}` : "データなし"}</Text>
           </View>
         </View>
       </TouchableOpacity>
 
       <HealthDataInputModal
+        id={id}
         visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onSave={handleSave}
         title={title}
-        placeholder="数値を入力"
         unit={unit}
-        isLoading={isSaving}
+        placeholder={placeholder}
+        onClose={() => setIsModalVisible(false)}
+        onDataUpdate={onDataUpdate}
       />
     </>
   );

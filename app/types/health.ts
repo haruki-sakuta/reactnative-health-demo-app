@@ -16,7 +16,8 @@ export type HealthDataCategory =
   | "walking" // 歩行
   | "other"; // その他のデータ
 
-export type HealthDataType =
+// iOS用の型定義
+export type IOSHealthDataType =
   // アクティビティ
   | "nikeFuel"
   | "activity"
@@ -217,331 +218,240 @@ export type HealthDataType =
   | "fallCount"
   | "sunlightExposureOther"
   // 睡眠
-  | "sleepData"
-  // Android用の型定義
+  | "sleepData";
+
+// Android用の型定義
+export type AndroidHealthDataType =
   | "activeCaloriesBurned"
   | "basalBodyTemperature"
   | "basalMetabolicRate"
-  | "bloodGlucoseAndroid"
-  | "bloodPressureAndroid"
+  | "bloodGlucose"
+  | "bloodPressure"
   | "bodyFat"
-  | "bodyTemperatureAndroid"
+  | "bodyTemperature"
   | "boneMass"
   | "cervicalMucus"
-  | "exerciseAndroid"
-  | "distanceAndroid"
+  | "cyclingPedalingCadence"
+  | "distance"
   | "elevationGained"
+  | "exerciseSession"
   | "floorsClimbed"
-  | "heartRateAndroid"
-  | "heightAndroid"
+  | "heartRate"
+  | "height"
   | "hydration"
   | "leanBodyMass"
-  | "menstruationAndroid"
+  | "menstruationFlow"
+  | "menstruationPeriod"
   | "nutrition"
   | "ovulationTest"
-  | "oxygenSaturationAndroid"
+  | "oxygenSaturation"
   | "power"
-  | "respiratoryRateAndroid"
-  | "restingHeartRateAndroid"
-  | "sexualActivityAndroid"
-  | "sleepAndroid"
+  | "respiratoryRate"
+  | "restingHeartRate"
+  | "sexualActivity"
+  | "sleepSession"
   | "speed"
-  | "stepsAndroid"
+  | "stepsCadence"
+  | "steps"
   | "totalCaloriesBurned"
   | "vo2Max"
+  | "weight"
   | "wheelchairPushes"
-  | "exerciseRoute";
+  | "writeExerciseRoute";
 
-export interface HealthDataValue {
-  value: number | null;
-  unit: string;
-  lastUpdated?: Date;
-}
+export const androidUnitConversions: Partial<
+  Record<
+    AndroidHealthDataType,
+    {
+      to: (value: number) => number;
+      from: (value: number) => number;
+    }
+  >
+> = {
+  height: {
+    to: (value: number) => value * 100, // メートルからセンチメートル
+    from: (value: number) => value / 100, // センチメートルからメートル
+  },
+  weight: {
+    to: (value: number) => value,
+    from: (value: number) => value,
+  },
+  steps: {
+    to: (value: number) => value,
+    from: (value: number) => value,
+  },
+  bloodGlucose: {
+    to: (value: number) => value,
+    from: (value: number) => value,
+  },
+  // 必要に応じて他のデータタイプの変換を追加
+};
 
-export interface HealthData {
-  [key: string]: HealthDataValue;
-}
-
-export interface HealthDataCardProps {
-  title: string;
-  value: number | null;
-  unit: string;
-  onPress?: () => void;
-  type?: HealthDataType;
-}
-
-export interface HealthDataInputModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSave: (value: number) => Promise<void>;
-  title: string;
-  placeholder: string;
-  unit: string;
-  isLoading?: boolean;
-}
-
-export interface InputFormProps {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
-  placeholder: string;
-}
-
+/**
+ * @deprecated 今後はIHealthKitServiceとIHealthConnectServiceを使用してください
+ */
 export interface IHealthService {
+  // initialize(): Promise<void>;
+  // requestPermissions(): Promise<boolean>;
+  // fetchData(type: HealthDataType): Promise<HealthDataValue>;
+  // saveData(type: HealthDataType, value: number): Promise<void>;
+  // fetchHeight(): Promise<number | null>;
+  // saveHeight(height: number): Promise<void>;
+  // fetchSteps(): Promise<number | null>;
+  // getHeight(): Promise<number | null>;
+  // getSteps(): Promise<number | null>;
   initialize(): Promise<void>;
   requestPermissions(): Promise<boolean>;
-  fetchData(type: HealthDataType): Promise<HealthDataValue>;
-  saveData(type: HealthDataType, value: number): Promise<void>;
   fetchHeight(): Promise<number | null>;
   saveHeight(height: number): Promise<void>;
   fetchSteps(): Promise<number | null>;
-  getHeight(): Promise<number | null>;
-  getSteps(): Promise<number | null>;
 }
 
-// iOS用の型定義
-export type IOSHealthDataType = Extract<
-  HealthDataType,
-  | "nikeFuel"
-  | "activity"
-  | "activeEnergy"
-  | "walkingRunningDistance"
-  | "exerciseTime"
-  | "cyclingCadence"
-  | "cyclingPower"
-  | "cyclingSpeed"
-  | "standHours"
-  | "standMinutes"
-  | "downhillSnowSportsDistance"
-  | "pushCount"
-  | "moveTime"
-  | "runningPower"
-  | "runningSpeed"
-  | "workout"
-  | "basalEnergyBurned"
-  | "swimmingDistance"
-  | "functionalThresholdPower"
-  | "cyclingDistance"
-  | "wheelchairDistance"
-  | "flightsClimbed"
-  | "cardioFitness"
-  | "heartRate"
-  | "physicalEffort"
-  | "swimmingStrokeCount"
-  | "underwaterDepth"
-  | "steps"
-  | "bloodPressure"
-  | "bloodGlucose"
-  | "menstruation"
-  | "respiratoryRate"
-  | "oxygenSaturation"
-  | "bodyTemperature"
-  | "heartRateVital"
-  | "caffeine"
-  | "potassium"
-  | "calcium"
-  | "chromium"
-  | "selenium"
-  | "protein"
-  | "thiamin"
-  | "niacin"
-  | "sodium"
-  | "pantothenicAcid"
-  | "biotin"
-  | "vitaminA"
-  | "vitaminB2"
-  | "vitaminB6"
-  | "vitaminB12"
-  | "vitaminC"
-  | "vitaminD"
-  | "vitaminE"
-  | "vitaminK"
-  | "magnesium"
-  | "manganese"
-  | "molybdenum"
-  | "iodine"
-  | "phosphorus"
-  | "zinc"
-  | "monounsaturatedFat"
-  | "chloride"
-  | "dietaryFiber"
-  | "dietaryCholesterol"
-  | "dietarySugar"
-  | "water"
-  | "dietaryEnergy"
-  | "totalFat"
-  | "polyunsaturatedFat"
-  | "carbohydrates"
-  | "iron"
-  | "copper"
-  | "saturatedFat"
-  | "folate"
-  | "respiratorySixMinuteWalk"
-  | "inhalerUsage"
-  | "respiratoryRateVital"
-  | "peakExpiratoryFlow"
-  | "oxygenSaturationVital"
-  | "cardioFitnessVital"
-  | "forcedExpiratoryVolume"
-  | "forcedVitalCapacity"
-  | "cycleRecord"
-  | "cough"
-  | "soreThroat"
-  | "hotFlash"
-  | "dizziness"
-  | "chills"
-  | "diarrhea"
-  | "drySkin"
-  | "moodChanges"
-  | "memoryLapse"
-  | "chestTightness"
-  | "heartburn"
-  | "irregularHeartbeat"
-  | "lowBackPain"
-  | "pelvicPain"
-  | "fainting"
-  | "appetiteChanges"
-  | "nightSweats"
-  | "sleepChanges"
-  | "shortnessOfBreath"
-  | "bodyPain"
-  | "hairLoss"
-  | "nausea"
-  | "headache"
-  | "breastPain"
-  | "urinaryIncontinence"
-  | "fever"
-  | "fatigue"
-  | "runnyNose"
-  | "rapidHeartbeat"
-  | "abdominalBloating"
-  | "abdominalCramps"
-  | "constipation"
-  | "tasteLoss"
-  | "wheezing"
-  | "smellLoss"
-  | "vomiting"
-  | "nasalCongestion"
-  | "vaginalDryness"
-  | "acne"
-  | "depressionRisk"
-  | "mentalExerciseTime"
-  | "mindfulMinutes"
-  | "mentalState"
-  | "mentalSleep"
-  | "sunlightExposure"
-  | "anxietyRisk"
-  | "restingHeartRate"
-  | "heartBloodPressure"
-  | "highHeartRateNotification"
-  | "ecg"
-  | "heartCardioFitness"
-  | "cardioFitnessLevel"
-  | "heartRateHeart"
-  | "heartRateCount"
-  | "heartRateVariability"
-  | "atrialFibrillation"
-  | "lowHeartRateNotification"
-  | "microcirculation"
-  | "irregularHeartRhythmNotification"
-  | "walkingHeartRate"
-  | "bmi"
-  | "glassesPrescription"
-  | "basalBodyTemperature"
-  | "wristTemperature"
-  | "leanBodyMass"
-  | "height"
-  | "bodyTemperatureBody"
-  | "bodyFatPercentage"
-  | "weight"
-  | "waistCircumference"
-  | "skinPotential"
-  | "audiogram"
-  | "noiseNotification"
-  | "headphoneVolume"
-  | "headphoneNotification"
-  | "environmentalSoundLevel"
-  | "environmentalSoundReduction"
-  | "medicationData"
-  | "walkingSixMinuteWalk"
-  | "runningStrideLength"
-  | "stairDescentSpeed"
-  | "stairAscentSpeed"
-  | "verticalOscillation"
-  | "walkingCardioFitness"
-  | "groundContactTime"
-  | "walkingStability"
-  | "walkingStabilityNotification"
-  | "walkingSpeed"
-  | "walkingAsymmetry"
-  | "walkingDoubleSupportTime"
-  | "stepLength"
-  | "uvExposure"
-  | "insulinDelivery"
-  | "alcoholConsumption"
-  | "inhalerUsageOther"
-  | "bloodAlcoholContent"
-  | "bloodGlucoseOther"
-  | "toothbrushing"
-  | "handwashing"
-  | "waterTemperature"
-  | "sexualActivity"
-  | "fallCount"
-  | "sunlightExposureOther"
-  | "sleepData"
->;
-
-// Android用の型定義
-export type AndroidHealthDataType = Extract<
-  HealthDataType,
-  | "activeCaloriesBurned"
-  | "basalBodyTemperature"
-  | "basalMetabolicRate"
-  | "bloodGlucoseAndroid"
-  | "bloodPressureAndroid"
-  | "bodyFat"
-  | "bodyTemperatureAndroid"
-  | "boneMass"
-  | "cervicalMucus"
-  | "exerciseAndroid"
-  | "distanceAndroid"
-  | "elevationGained"
-  | "floorsClimbed"
-  | "heartRateAndroid"
-  | "heightAndroid"
-  | "hydration"
-  | "leanBodyMass"
-  | "menstruationAndroid"
-  | "nutrition"
-  | "ovulationTest"
-  | "oxygenSaturationAndroid"
-  | "power"
-  | "respiratoryRateAndroid"
-  | "restingHeartRateAndroid"
-  | "sexualActivityAndroid"
-  | "sleepAndroid"
-  | "speed"
-  | "stepsAndroid"
-  | "totalCaloriesBurned"
-  | "vo2Max"
-  | "wheelchairPushes"
-  | "exerciseRoute"
->;
-
-// プラットフォーム固有の設定を定義
-export interface PlatformSpecificConfig {
-  isEditable: boolean;
-  unit: string;
-  permissions: {
-    read: boolean;
-    write: boolean;
-  };
+/**
+ * iOS用のヘルスケアサービスインターフェース
+ * HealthKitを使用したデータの取得・保存を定義
+ */
+export interface IHealthKitService {
+  // initialize(): Promise<void>;
+  // requestPermissions(): Promise<boolean>;
+  // fetchData(type: HealthDataType): Promise<HealthDataValue>;
+  // saveData(type: HealthDataType, value: number): Promise<void>;
+  // (): Promise<void>;
+  // fetchHeight(): Promise<number | null>;
+  // saveHeight(height: number): Promise<void>;
+  // fetchSteps(): Promise<number | null>;
+  // getHeight(): Promise<number | null>;
+  // getSteps(): Promise<number | null>;
 }
+
+/**
+ * Android用のヘルスケアサービスインターフェース
+ * Health Connectを使用したデータの取得・保存を定義
+ */
+export interface IHealthConnectService {
+  // 初期化と権限
+  initialize(): Promise<void>;
+  requestPermissions(): Promise<boolean>;
+
+  // 一括取得
+  fetchAllHealthData(): Promise<{
+    activeCaloriesBurned: string | null;
+    basalBodyTemperature: string | null;
+    basalMetabolicRate: string | null;
+    bloodGlucose: string | null;
+    bloodPressure: { systolic: string; diastolic: string } | null;
+    bodyFat: string | null;
+    bodyTemperature: string | null;
+    boneMass: string | null;
+    cervicalMucus: string | null;
+    cyclingPedalingCadence: string | null;
+    distance: string | null;
+    elevationGained: string | null;
+    exerciseSession: string | null;
+    floorsClimbed: string | null;
+    heartRate: string | null;
+    height: string | null;
+    hydration: string | null;
+    leanBodyMass: string | null;
+    menstruationFlow: string | null;
+    menstruationPeriod: string | null;
+    nutrition: string | null;
+    ovulationTest: string | null;
+    oxygenSaturation: string | null;
+    power: string | null;
+    respiratoryRate: string | null;
+    restingHeartRate: string | null;
+    sexualActivity: string | null;
+    sleepSession: string | null;
+    speed: string | null;
+    stepsCadence: string | null;
+    steps: string | null;
+    totalCaloriesBurned: string | null;
+    vo2Max: string | null;
+    weight: string | null;
+    wheelchairPushes: string | null;
+  } | null>;
+
+  // データ取得・保存
+  fetchActiveCaloriesBurned(): Promise<string | null>;
+  saveActiveCaloriesBurned(value: string): Promise<void>;
+  fetchBasalBodyTemperature(): Promise<string | null>;
+  saveBasalBodyTemperature(value: string): Promise<void>;
+  fetchBasalMetabolicRate(): Promise<string | null>;
+  saveBasalMetabolicRate(value: string): Promise<void>;
+  fetchBloodGlucose(): Promise<string | null>;
+  saveBloodGlucose(value: string): Promise<void>;
+  fetchBloodPressure(): Promise<{ systolic: string; diastolic: string } | null>;
+  saveBloodPressure(value: { systolic: string; diastolic: string }): Promise<void>; // 引数をどうするか迷う（数的に）
+  fetchBodyFat(): Promise<string | null>;
+  saveBodyFat(value: string): Promise<void>;
+  fetchBodyTemperature(): Promise<string | null>;
+  saveBodyTemperature(value: string): Promise<void>;
+  fetchBoneMass(): Promise<string | null>;
+  saveBoneMass(value: string): Promise<void>;
+  fetchCervicalMucus(): Promise<string | null>;
+  saveCervicalMucus(value: string): Promise<void>;
+  fetchCyclingPedalingCadence(): Promise<string | null>;
+  saveCyclingPedalingCadence(value: string): Promise<void>;
+  fetchDistance(): Promise<string | null>;
+  saveDistance(value: string): Promise<void>;
+  fetchElevationGained(): Promise<string | null>;
+  saveElevationGained(value: string): Promise<void>;
+  fetchExerciseSession(): Promise<string | null>;
+  saveExerciseSession(value: string): Promise<void>;
+  fetchFloorsClimbed(): Promise<string | null>;
+  saveFloorsClimbed(value: string): Promise<void>;
+  fetchHeartRate(): Promise<string | null>;
+  saveHeartRate(value: string): Promise<void>;
+  fetchHeight(): Promise<string | null>;
+  saveHeight(value: string): Promise<void>;
+  fetchHydration(): Promise<string | null>;
+  saveHydration(value: string): Promise<void>;
+  fetchLeanBodyMass(): Promise<string | null>;
+  saveLeanBodyMass(value: string): Promise<void>;
+  fetchMenstruationFlow(): Promise<string | null>;
+  saveMenstruationFlow(value: string): Promise<void>;
+  fetchMenstruationPeriod(): Promise<string | null>;
+  saveMenstruationPeriod(value: string): Promise<void>;
+  fetchNutrition(nutritionType: string): Promise<string | null>;
+  saveNutrition(nutritionType: string, value: string, mealType?: string): Promise<void>;
+  fetchOvulationTest(): Promise<string | null>;
+  saveOvulationTest(value: string): Promise<void>;
+  fetchOxygenSaturation(): Promise<string | null>;
+  saveOxygenSaturation(value: string): Promise<void>;
+  fetchPower(): Promise<string | null>;
+  savePower(value: string): Promise<void>;
+  fetchRespiratoryRate(): Promise<string | null>;
+  saveRespiratoryRate(value: string): Promise<void>;
+  fetchRestingHeartRate(): Promise<string | null>;
+  saveRestingHeartRate(value: string): Promise<void>;
+  fetchSexualActivity(): Promise<string | null>;
+  saveSexualActivity(value: string): Promise<void>;
+  fetchSleepSession(): Promise<string | null>;
+  saveSleepSession(value: string): Promise<void>;
+  fetchSpeed(): Promise<string | null>;
+  saveSpeed(value: string): Promise<void>;
+  fetchStepsCadence(): Promise<string | null>;
+  saveStepsCadence(value: string): Promise<void>;
+  fetchSteps(): Promise<string | null>;
+  saveSteps(value: string): Promise<void>;
+  fetchTotalCaloriesBurned(): Promise<string | null>;
+  saveTotalCaloriesBurned(value: string): Promise<void>;
+  fetchVo2Max(): Promise<string | null>;
+  saveVo2Max(value: string): Promise<void>;
+  fetchWeight(): Promise<string | null>;
+  saveWeight(value: string): Promise<void>;
+  fetchWheelchairPushes(): Promise<string | null>;
+  saveWheelchairPushes(value: string): Promise<void>;
+  saveWriteExerciseRoute(value: string): Promise<void>;
+}
+
+// プラットフォーム固有の型定義
+export type PlatformHealthDataType = IOSHealthDataType | AndroidHealthDataType;
 
 // 共通の基本設定
 export interface BaseHealthDataConfig {
-  id: HealthDataType;
+  id: PlatformHealthDataType;
   title: string;
   unit: string;
   isEditable: boolean;
@@ -570,8 +480,34 @@ export interface IOSHealthDataConfig extends PlatformDataConfig {
 }
 
 // Android用のデータ設定
-export interface AndroidHealthDataConfig extends PlatformDataConfig {
+export interface AndroidHealthDataConfig {
   id: AndroidHealthDataType;
-  platform: "android";
-  androidConfig: PlatformSpecificConfig;
+  title: string;
+  unit: string;
+  placeholder: string;
+  permissions: {
+    read: boolean;
+    write: boolean;
+  };
+  order: number;
+}
+
+// 後方互換性のためにHealthDataTypeをエイリアスとして定義
+export type HealthDataType = IOSHealthDataType | AndroidHealthDataType;
+
+// プラットフォーム固有の設定を定義
+export interface PlatformSpecificConfig {
+  isEditable: boolean;
+  unit: string;
+  placeholder: string;
+  permissions: {
+    read: boolean;
+    write: boolean;
+  };
+}
+
+// 日付範囲を定義
+export interface DateRange {
+  start: Date;
+  end: Date;
 }

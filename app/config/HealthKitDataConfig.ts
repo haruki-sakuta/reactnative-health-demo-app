@@ -116,7 +116,7 @@ export const HealthKitDataConfigs: {
     id: "steps",
     title: "歩数",
     unit: "歩",
-    description: "今日の累計歩数",
+    description: "最新の歩数",
     category: "activity",
     minValue: 0,
     maxValue: 100000,
